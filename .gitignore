@@ -35,3 +35,7 @@
 STM8_Demo/Project/si_project/*
 STM8_Demo/Project/Debug/*
 
+STM8_Demo/Project/settings/STM32_Demo.Debug.cspy.bat
+STM8_Demo/Project/settings/STM32_Demo.wsdt
+STM8_Demo/Project/settings/STM32_Demo.Debug.cspy.bat
+STM8_Demo/Project/STM32_Demo.dep
