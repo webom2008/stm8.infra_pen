@@ -84,10 +84,10 @@ extern void IrNecTest(void);
 
 static void CLK_Config(void)
 {
-   /* Select HSE as system clock source */
+   /* Select HSI as system clock source */
   CLK_SYSCLKSourceSwitchCmd(ENABLE);
   CLK_SYSCLKSourceConfig(CLK_SYSCLKSource_HSI);
-  /* system clock prescaler: 1*/
+  /* system clock prescaler: 2*/
   CLK_SYSCLKDivConfig(CLK_SYSCLKDiv_2);
   while (CLK_GetSYSCLKSource() != CLK_SYSCLKSource_HSI)
   {}
@@ -193,54 +193,42 @@ static void TIM4_Config(void)
   TIM4_Cmd(ENABLE);
 }
 
+static void test_MMA8652(void)
+{
+    uint8_t status;
+    uint8_t version;
+    int16_t x_mg;
+    int16_t y_mg;
+    int16_t z_mg;
+    version = MMA8652_ReadReg( WHO_AM_I_REG);
+    while(1)
+    {
+        MMA865x_getXYZ(&status, &x_mg, &y_mg, &z_mg);
+        Delay(0xFFFF);
+        Delay(0xFFFF);
+        Delay(0xFFFF);
+    }
+}
 
 /**
   * @brief  Main program.
   * @param  None
   * @retval None
   */
-uint8_t value[3] = {0,};
 void main(void)
 {
-//    GPIO_Config();
-//    
+    GPIO_Config();
+
     CLK_Config();
-//    
-//    TIM2_Config();
-//        
-//    TIM4_Config();
-    
-    //MMA8652_Config();
+
+    TIM2_Config();
+
+    TIM4_Config();
     
     MMA8652_Init();
+
+    MMA865x_Active();
     
-    Delay(0xFFFF);
-    
-//    value = MMA8652_ReadReg( CTRL_REG2);
-//    
-//     Delay(0xFFFF);
-//    
-//    MMA8652_WriteReg( CTRL_REG2, RST_MASK);
-//    
-//    Delay(0xFFFF);
-//    
-//    value = MMA8652_ReadReg( CTRL_REG2);
-    
-    while(1)
-    {
-        value[0] = MMA8652_ReadReg( WHO_AM_I_REG);
-        Delay(0xFFFF);
-        Delay(0xFFFF);
-        Delay(0xFFFF);
-        value[1] = MMA8652_ReadReg( 0x13);
-        Delay(0xFFFF);
-        Delay(0xFFFF);
-        Delay(0xFFFF);
-        value[2] = MMA8652_ReadReg( 0x14);
-        Delay(0xFFFF);
-        Delay(0xFFFF);
-        Delay(0xFFFF);
-    }
     
     ClearQueue(pIrQueue);
     
@@ -248,9 +236,9 @@ void main(void)
     enableInterrupts();
     while (1)
     {
-//      Delay(0xFFFF);
-//      IrNECSend(CUSTOME_CODE, 0x03);
-      //IrNecTest();
+      Delay(0xFFFF);
+      IrNECSend(CUSTOME_CODE, 0x03);
+      IrNecTest();
     }
 }
 
