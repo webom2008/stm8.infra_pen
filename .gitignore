@@ -32,5 +32,6 @@
 *.dSYM/
 
 # Add by QWB
-./STM8_Demo/Project/si_project/*
-./STM8_Demo/Project/Debug/*
+STM8_Demo/Project/si_project/*
+STM8_Demo/Project/Debug/*
+
