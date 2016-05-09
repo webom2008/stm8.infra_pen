@@ -193,23 +193,6 @@ static void TIM4_Config(void)
   TIM4_Cmd(ENABLE);
 }
 
-static void test_MMA8652(void)
-{
-    uint8_t status;
-    uint8_t version;
-    int16_t x_mg;
-    int16_t y_mg;
-    int16_t z_mg;
-    version = MMA8652_ReadReg( WHO_AM_I_REG);
-    while(1)
-    {
-        MMA865x_getXYZ(&status, &x_mg, &y_mg, &z_mg);
-        Delay(0xFFFF);
-        Delay(0xFFFF);
-        Delay(0xFFFF);
-    }
-}
-
 /**
   * @brief  Main program.
   * @param  None
@@ -217,9 +200,9 @@ static void test_MMA8652(void)
   */
 void main(void)
 {
-    GPIO_Config();
-
     CLK_Config();
+    
+    GPIO_Config();
 
     TIM2_Config();
 
@@ -229,16 +212,17 @@ void main(void)
 
     MMA865x_Active();
     
-    
     ClearQueue(pIrQueue);
     
     /* Enable general interrupts */
-    enableInterrupts();
+//    enableInterrupts();
+    
     while (1)
     {
-      Delay(0xFFFF);
-      IrNECSend(CUSTOME_CODE, 0x03);
-      IrNecTest();
+        MMA8652_Test();
+        Delay(0xFFFF);
+//        IrNECSend(CUSTOME_CODE, 0x03);
+        IrNecTest();
     }
 }
 

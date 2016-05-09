@@ -725,6 +725,7 @@ void MMA865x_getXYZ(uint8_t *pStatus,
                     int16_t *pX_mg, 
                     int16_t *pY_mg,
                     int16_t *pZ_mg);
+void MMA8652_Test(void);
 
 #endif
 

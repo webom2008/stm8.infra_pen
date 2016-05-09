@@ -1,5 +1,7 @@
 #include "mma8652.h"
 
+extern void Delay(__IO uint16_t nCount);
+
 void MMA8652_LowLevel_Init(void)
 {
     CLK_PeripheralClockConfig(MMA8652_I2C_CLK, ENABLE);
@@ -287,6 +289,7 @@ void MMA8652_Config(void)
     MMA8652_WriteBytes(addr, &value, 1);
     do 
     {
+        Delay(0xFFFF);
         MMA8652_ReadBytes(CTRL_REG2, &value, 1);
     } while (value & RST_MASK);
     
@@ -356,4 +359,21 @@ void MMA865x_getXYZ(uint8_t *pStatus,
     *pY_mg = adc_convert_to_mg((uint16_t)(pBuffer[3]<<8 | pBuffer[4]));
     *pZ_mg = adc_convert_to_mg((uint16_t)(pBuffer[5]<<8 | pBuffer[6]));
 }
+
+
+uint8_t status;
+uint8_t version;
+int16_t x_mg;
+int16_t y_mg;
+int16_t z_mg;
+
+void MMA8652_Test(void)
+{
+    version = MMA8652_ReadReg( WHO_AM_I_REG);
+    MMA865x_getXYZ(&status, &x_mg, &y_mg, &z_mg);
+    Delay(0xFFFF);
+    Delay(0xFFFF);
+    Delay(0xFFFF);
+}
+
 
