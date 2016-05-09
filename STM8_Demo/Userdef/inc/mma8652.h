@@ -710,21 +710,16 @@ enum
 
 
 /*function ----------------------------------------*/
-void MMA8652_LowLevel_Init(void);
 void MMA8652_Init(void);
-uint8_t MMA8652_ReadReg(uint8_t RegName);
 uint8_t MMA8652_ReadBytes(  const uint8_t u8StartAddr, 
                             uint8_t *pRegValue, 
                             const uint8_t nLen);
 uint8_t MMA8652_WriteBytes( const uint8_t u8StartRegAddr, 
                             const uint8_t *pu8RegValue,
                             const uint8_t nLen);
-void MMA8652_Config(void);
+void MMA8652_ConfigTransient(uint16_t thres_mg, uint16_t count_time_ms);
 void MMA865x_Active (void);
-void MMA865x_getXYZ(uint8_t *pStatus,
-                    int16_t *pX_mg, 
-                    int16_t *pY_mg,
-                    int16_t *pZ_mg);
+void MMA865x_Standby(void);
 void MMA8652_Test(void);
 
 #endif

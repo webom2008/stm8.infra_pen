@@ -210,7 +210,7 @@ void main(void)
     
     MMA8652_Init();
 
-    MMA865x_Active();
+    MMA8652_ConfigTransient(64, 100);
     
     ClearQueue(pIrQueue);
     
@@ -221,7 +221,6 @@ void main(void)
     {
         MMA8652_Test();
         Delay(0xFFFF);
-//        IrNECSend(CUSTOME_CODE, 0x03);
         IrNecTest();
     }
 }
