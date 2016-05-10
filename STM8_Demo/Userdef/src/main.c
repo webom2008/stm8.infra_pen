@@ -26,10 +26,7 @@
   */ 
 
 /* Includes ------------------------------------------------------------------*/
-#include "stm8l15x.h"
-#include "stm8l15x_gpio.h"
-#include "ir_driver.h"
-#include "mma8652.h"
+#include "includes.h"
 
 /** @addtogroup STM8L15x_StdPeriph_Examples
   * @{
@@ -84,22 +81,25 @@ extern void IrNecTest(void);
 
 static void CLK_Config(void)
 {
-   /* Select HSI as system clock source */
-  CLK_SYSCLKSourceSwitchCmd(ENABLE);
-  CLK_SYSCLKSourceConfig(CLK_SYSCLKSource_HSI);
-  /* system clock prescaler: 2*/
-  CLK_SYSCLKDivConfig(CLK_SYSCLKDiv_2);
-  while (CLK_GetSYSCLKSource() != CLK_SYSCLKSource_HSI)
-  {}
-  
-  /* Enable I2C1 clock */
-  CLK_PeripheralClockConfig(CLK_Peripheral_I2C1, ENABLE);
-  
+    /* Select HSI as system clock source */
+    CLK_SYSCLKSourceSwitchCmd(ENABLE);
+    CLK_SYSCLKSourceConfig(CLK_SYSCLKSource_HSI);
+    /* system clock prescaler: 2*/
+    CLK_SYSCLKDivConfig(CLK_SYSCLKDiv_2);
+    while (CLK_GetSYSCLKSource() != CLK_SYSCLKSource_HSI)
+    {}
+
+    /* Enable I2C1 clock */
+    CLK_PeripheralClockConfig(CLK_Peripheral_I2C1, ENABLE);
+
     /* Enable TIM2 clock */
-  CLK_PeripheralClockConfig(CLK_Peripheral_TIM2, ENABLE);
-  
-  /* Enable TIM4 clock */
-  CLK_PeripheralClockConfig(CLK_Peripheral_TIM4, ENABLE);
+    CLK_PeripheralClockConfig(CLK_Peripheral_TIM2, ENABLE);
+    
+    /* Enable TIM3 clock */
+    CLK_PeripheralClockConfig(CLK_Peripheral_TIM3, ENABLE);
+
+    /* Enable TIM4 clock */
+    CLK_PeripheralClockConfig(CLK_Peripheral_TIM4, ENABLE);
 }
 
 /**
@@ -201,12 +201,14 @@ static void TIM4_Config(void)
 void main(void)
 {
     CLK_Config();
-    
-    GPIO_Config();
 
+    SysTick_Init();
+    
     TIM2_Config();
 
     TIM4_Config();
+    
+    GPIO_Config();
     
     MMA8652_Init();
 
@@ -215,13 +217,14 @@ void main(void)
     ClearQueue(pIrQueue);
     
     /* Enable general interrupts */
-//    enableInterrupts();
+    enableInterrupts();
+
+    SysTick_Start();
     
     while (1)
     {
-        MMA8652_Test();
-        Delay(0xFFFF);
-        IrNecTest();
+        MMA8652_server();
+        IrNec_server();
     }
 }
 

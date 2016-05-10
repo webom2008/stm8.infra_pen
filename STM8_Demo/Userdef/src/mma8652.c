@@ -1,12 +1,65 @@
-#include "mma8652.h"
+/******************************************************************************
 
-extern void Delay(__IO uint16_t nCount);
+   Copyright (C), 2005-2015, CVTE.
+
+ ******************************************************************************
+  File Name     : mma8652.h
+  Version       : Initial Draft
+  Author        : qiuweibo
+  Created       : 2016/5/10
+  Last Modified :
+  Description   : mma8652.c header file
+  Function List :
+  History       :
+  1.Date        : 2016/5/10
+    Author      : qiuweibo
+    Modification: Created file
+
+******************************************************************************/
+
+#include "includes.h"
+
+/*----------------------------------------------*
+ * external variables                           *
+ *----------------------------------------------*/
+
+/*----------------------------------------------*
+ * external routine prototypes                  *
+ *----------------------------------------------*/
+
+/*----------------------------------------------*
+ * internal routine prototypes                  *
+ *----------------------------------------------*/
 static void MMA8652_LowLevel_Init(void);
 static void MMA8652_Config(void);
 static void MMA865x_getXYZ( uint8_t *pStatus,
                             int16_t *pX_mg, 
                             int16_t *pY_mg,
                             int16_t *pZ_mg);
+
+/*----------------------------------------------*
+ * project-wide global variables                *
+ *----------------------------------------------*/
+static u32 test_pin_high_tick;
+static u8 test_pin_high_flag = 0;
+
+/*----------------------------------------------*
+ * module-wide global variables                 *
+ *----------------------------------------------*/
+
+/*----------------------------------------------*
+ * constants                                    *
+ *----------------------------------------------*/
+
+/*----------------------------------------------*
+ * macros                                       *
+ *----------------------------------------------*/
+#define TEST_PIN_TIGGLE_THRES_MS    500
+
+/*----------------------------------------------*
+ * routines' implementations                    *
+ *----------------------------------------------*/
+
 
 static void MMA8652_LowLevel_Init(void)
 {
@@ -19,6 +72,22 @@ static void MMA8652_LowLevel_Init(void)
     GPIO_Init(  MMA8652_I2C_SMBUSALERT_GPIO_PORT,
                 MMA8652_I2C_SMBUSALERT_PIN, 
                 GPIO_Mode_In_FL_IT);
+}
+
+static void TestPin_Init(void)
+{
+    GPIO_Init(GPIOB, GPIO_Pin_1, GPIO_Mode_Out_PP_Low_Slow);
+}
+
+static void TestPin_setValue(void)
+{
+    u32 tick = SysTick_Get();
+    if (tick - test_pin_high_tick > TEST_PIN_TIGGLE_THRES_MS)
+    {
+        GPIO_SetBits(GPIOB, GPIO_Pin_1);
+        test_pin_high_tick = tick;
+        test_pin_high_flag = 1;
+    }
 }
 
 void MMA8652_Init(void)
@@ -37,6 +106,8 @@ void MMA8652_Init(void)
     I2C_Cmd(MMA8652_I2C, ENABLE);
 
     MMA8652_Config();
+
+    TestPin_Init();
 }
 
 uint8_t MMA8652_ReadBytes(  const uint8_t u8StartAddr, 
@@ -305,6 +376,12 @@ static void MMA8652_InitTransientDetect(void)
 }
 //===============================运动检测方法2(高通滤波) END =================
 
+static void delay(__IO uint16_t nCount)
+{
+    u16 i = 0;
+    for (i=0; i < nCount; i++);
+}
+
 static void MMA8652_Config(void)
 {
     uint8_t addr = 0;
@@ -318,7 +395,7 @@ static void MMA8652_Config(void)
     MMA8652_WriteBytes(addr, &value, 1);
     do 
     {
-        Delay(0xFFFF);
+        delay(0xFFFF);
         MMA8652_ReadBytes(CTRL_REG2, &value, 1);
     } while (value & RST_MASK);
     
@@ -344,6 +421,26 @@ static void MMA8652_Config(void)
 //    MMA8652_InitMotionDetect();
     MMA8652_InitTransientDetect();
 }
+
+void MMA8652_InterruptHandle(void)
+{
+//    uint8_t addr = INT_SOURCE_REG;
+//    uint8_t status = 0;
+//    MMA8652_ReadBytes(addr, &status, 1);
+//    if (status & SRC_TRANS_MASK)
+//    {
+//        addr = TRANSIENT_SRC_REG;
+//        MMA8652_ReadBytes(addr, &status, 1);
+//    }
+
+    /* 中断服务程序-力求简洁*/
+    uint8_t addr = TRANSIENT_SRC_REG;
+    uint8_t status = 0;
+    MMA8652_ReadBytes(addr, &status, 1);
+    TestPin_setValue();
+}
+
+
 
 /*adc: [15:8] MSBs, [7:4] LSBs*/
 static int16_t adc_convert_to_mg(uint16_t adc)
@@ -385,24 +482,22 @@ uint8_t version;
 int16_t x_mg;
 int16_t y_mg;
 int16_t z_mg;
-
-void MMA8652_Test(void)
+void MMA8652_server(void)
 {
+    static u32 server_tick = 0;
     uint8_t addr = WHO_AM_I_REG;
-    MMA8652_ReadBytes(addr, &version, 1);
-
-    MMA865x_getXYZ(&status, &x_mg, &y_mg, &z_mg);
     
-    addr = INT_SOURCE_REG;
-    MMA8652_ReadBytes(addr, &status, 1);
-    if (status & SRC_TRANS_MASK)
+    if (IsOnTime(server_tick))
     {
-        addr = TRANSIENT_SRC_REG;
-        MMA8652_ReadBytes(addr, &status, 1);
+        server_tick = SysTick_Get() + 500;
+        if (test_pin_high_flag && \
+            (SysTick_Get() - test_pin_high_tick > TEST_PIN_TIGGLE_THRES_MS))
+        {
+            test_pin_high_flag = 0;
+            GPIO_ResetBits(GPIOB, GPIO_Pin_1);
+        }
+        MMA8652_ReadBytes(addr, &version, 1);
+        MMA865x_getXYZ(&status, &x_mg, &y_mg, &z_mg);
     }
-    
-    Delay(0xFFFF);
-    Delay(0xFFFF);
 }
-
 

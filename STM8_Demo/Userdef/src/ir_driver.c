@@ -16,8 +16,7 @@
   ******************************************************************************
   */
 
-#include "ir_driver.h"
-
+#include "includes.h"
 
 extern uint32_t g_Timer_Count;
 extern uint32_t g_Send_Count;
@@ -353,6 +352,18 @@ void IrNECSend(uint16_t customecode, uint8_t keycode)
 }
 
 void IrNecTest(void)
+{
+    u8 flag = 0;
+    IrDev TestNecDev;
+    flag = IrNecDecode(&TestNecDev);
+    if (flag == IRERR_SUCCESS || flag == IRERR_REPEAT)
+    {
+        IrNECSend(TestNecDev.customecode, TestNecDev.keycode);
+        //GPIO_ToggleBits(GPIOE, GPIO_Pin_7);
+    }
+}
+
+void IrNec_server(void)
 {
     u8 flag = 0;
     IrDev TestNecDev;

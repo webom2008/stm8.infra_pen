@@ -27,8 +27,7 @@
   */
 
 /* Includes ------------------------------------------------------------------*/
-#include "stm8l15x_it.h"
-#include "ir_driver.h"
+#include "includes.h"
 /** @addtogroup STM8L15x_StdPeriph_Template
   * @{
   */
@@ -263,6 +262,7 @@ INTERRUPT_HANDLER(EXTI7_IRQHandler,15)
     /* In order to detect unexpected events during development,
        it is recommended to set a breakpoint on the following instruction.
     */
+    MMA8652_InterruptHandle();
     EXTI_ClearITPendingBit(EXTI_IT_Pin7);
 }
 /**
@@ -335,6 +335,8 @@ INTERRUPT_HANDLER(TIM3_UPD_OVF_TRG_BRK_USART3_TX_IRQHandler,21)
     /* In order to detect unexpected events during development,
        it is recommended to set a breakpoint on the following instruction.
     */
+    SysTick_Incremental();
+    TIM3_ClearITPendingBit(TIM3_IT_Update);
 }
 /**
   * @brief Timer3 Capture/Compare /USART3 RX Interrupt routine.

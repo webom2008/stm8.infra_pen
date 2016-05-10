@@ -2044,6 +2044,9 @@
     <file>
       <name>$PROJ_DIR$\..\Userdef\src\stm8l15x_it.c</name>
     </file>
+    <file>
+      <name>$PROJ_DIR$\..\Userdef\src\system_timer.c</name>
+    </file>
   </group>
 </project>
 

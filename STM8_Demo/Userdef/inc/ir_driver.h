@@ -22,10 +22,6 @@
 #include "stm8l15x.h"
 #include "queue.h"
 
-typedef __IO uint32_t  vu32;
-typedef __IO uint16_t  vu16;
-typedef __IO uint8_t   vu8;
-
 
 #define BIT0    0x0001
 #define BIT1    0x0002
@@ -225,6 +221,8 @@ extern void IrRc5Reinit(void);
 extern u8 Ir_EnQueue(u32 data);
 extern u8 Ir_DeQueue(u32 *data);
 
+
+extern void IrNec_server(void);
 
 extern void IrNECSend(uint16_t customecode, uint8_t keycode);
 #endif
