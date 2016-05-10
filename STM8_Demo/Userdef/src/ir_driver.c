@@ -365,14 +365,14 @@ void IrNecTest(void)
 
 void IrNec_server(void)
 {
-    u8 flag = 0;
-    IrDev TestNecDev;
-    flag = IrNecDecode(&TestNecDev);
-    if (flag == IRERR_SUCCESS || flag == IRERR_REPEAT)
-    {
-        IrNECSend(TestNecDev.customecode, TestNecDev.keycode);
-        //GPIO_ToggleBits(GPIOE, GPIO_Pin_7);
-    }
+//    static u32 server_tick = 0;
+//    
+//    if (IsOnTime(server_tick))
+//    {
+//        server_tick = SysTick_Get() + 1000;
+//        IrNECSend(CUSTOME_CODE, 0x03);
+//    }
+    IrNecTest();
 }
 #endif
 

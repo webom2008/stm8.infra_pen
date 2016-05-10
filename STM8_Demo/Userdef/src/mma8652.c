@@ -54,7 +54,7 @@ static u8 test_pin_high_flag = 0;
 /*----------------------------------------------*
  * macros                                       *
  *----------------------------------------------*/
-#define TEST_PIN_TIGGLE_THRES_MS    500
+#define TEST_PIN_TIGGLE_THRES_MS    200
 
 /*----------------------------------------------*
  * routines' implementations                    *
@@ -82,7 +82,8 @@ static void TestPin_Init(void)
 static void TestPin_setValue(void)
 {
     u32 tick = SysTick_Get();
-    if (tick - test_pin_high_tick > TEST_PIN_TIGGLE_THRES_MS)
+    if (!test_pin_high_flag \
+        && (tick - test_pin_high_tick > TEST_PIN_TIGGLE_THRES_MS))
     {
         GPIO_SetBits(GPIOB, GPIO_Pin_1);
         test_pin_high_tick = tick;
@@ -406,7 +407,7 @@ static void MMA8652_Config(void)
     **    - Normal mode :12-bit ADC
     */
     addr = CTRL_REG1;
-    value = ASLP_RATE_20MS + DATA_RATE_5MS;
+    value = ASLP_RATE_20MS | DATA_RATE_5MS;
     MMA8652_WriteBytes(addr, &value, 1);
     
     /*
@@ -439,8 +440,6 @@ void MMA8652_InterruptHandle(void)
     MMA8652_ReadBytes(addr, &status, 1);
     TestPin_setValue();
 }
-
-
 
 /*adc: [15:8] MSBs, [7:4] LSBs*/
 static int16_t adc_convert_to_mg(uint16_t adc)
@@ -477,27 +476,27 @@ static void MMA865x_getXYZ( uint8_t *pStatus,
 }
 
 
-uint8_t status;
-uint8_t version;
-int16_t x_mg;
-int16_t y_mg;
-int16_t z_mg;
+//uint8_t status;
+//uint8_t version;
+//int16_t x_mg;
+//int16_t y_mg;
+//int16_t z_mg;
 void MMA8652_server(void)
 {
-    static u32 server_tick = 0;
-    uint8_t addr = WHO_AM_I_REG;
+//    static u32 server_tick = 0;
+//    uint8_t addr = WHO_AM_I_REG;
+//    if (IsOnTime(server_tick))
+//    {
+//        server_tick = SysTick_Get() + 500;
+//        MMA8652_ReadBytes(addr, &version, 1);
+//        MMA865x_getXYZ(&status, &x_mg, &y_mg, &z_mg);
+//    }
     
-    if (IsOnTime(server_tick))
+    if (test_pin_high_flag && \
+        (SysTick_Get() - test_pin_high_tick > TEST_PIN_TIGGLE_THRES_MS))
     {
-        server_tick = SysTick_Get() + 500;
-        if (test_pin_high_flag && \
-            (SysTick_Get() - test_pin_high_tick > TEST_PIN_TIGGLE_THRES_MS))
-        {
-            test_pin_high_flag = 0;
-            GPIO_ResetBits(GPIOB, GPIO_Pin_1);
-        }
-        MMA8652_ReadBytes(addr, &version, 1);
-        MMA865x_getXYZ(&status, &x_mg, &y_mg, &z_mg);
+        test_pin_high_flag = 0;
+        GPIO_ResetBits(GPIOB, GPIO_Pin_1);
     }
 }
 

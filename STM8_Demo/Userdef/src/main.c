@@ -77,7 +77,6 @@ void TIM2_Config(void);
 /* Private functions ---------------------------------------------------------*/
 
 extern uint32_t TimeCounter;
-extern void IrNecTest(void);
 
 static void CLK_Config(void)
 {
@@ -221,7 +220,7 @@ void main(void)
 
     SysTick_Start();
     
-    while (1)
+    while(1)
     {
         MMA8652_server();
         IrNec_server();
