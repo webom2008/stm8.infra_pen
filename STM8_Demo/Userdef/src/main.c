@@ -154,15 +154,30 @@ void TIM1_Config(void)
   TIM1_Cmd(DISABLE);
 }
 
+/*****************************************************************************
+ Prototype    : TIM2_Config
+ Description  : timer2 configure
+                System Clock = 8MHz
+                timer 4 freq. = 38KHz
+                ==============Detail for TIMER4=============
+                  SCLK = 8MHz, TIM4CLK = 8MHz / 2 = 4MHz
+                  freq. = 4MHz / 105 = 38095 Hz = 38 KHz
+                ============================================
+                
+ Input        : void  
+ Output       : None
+ Return Value : 
+ Calls        : 
+ Called By    : 
+ 
+  History        :
+  1.Date         : 2016/5/19
+    Author       : qiuweibo
+    Modification : Created function
+
+*****************************************************************************/
 void TIM2_Config(void)
 {
-  /* TIM2 configuration:
-     - TIM2 ETR is mapped to LSE
-     - TIM2 counter is clocked by LSE div 4
-      so the TIM2 counter clock used is LSE / 4 = 32.768 / 4 = 8.192 KHz
-    TIM2 Channel1 output frequency = TIM2CLK / (TIM2 Prescaler * (TIM2_PERIOD + 1))
-                                   = 8192 / (1 * 8) = 1024 Hz */
-  /* Time Base configuration */
   TIM2_TimeBaseInit(TIM2_Prescaler_2, TIM2_CounterMode_Up, TIM2_PERIOD);
 
   /* Channel 1 configuration in PWM1 mode */
@@ -176,19 +191,33 @@ void TIM2_Config(void)
   TIM2_Cmd(DISABLE);
 }
 
-/**
-  * @brief  Configure TIM4 peripheral 
-  * @param  None
-  * @retval None
-  */
+/*****************************************************************************
+ Prototype    : TIM4_Config
+ Description  : timer4 configure:
+                System Clock = 8MHz
+                timer 4 freq. = 20KHz, 50us
+                ==============Detail for TIMER4=============
+                  SCLK = 8MHz, TIM4CLK = 8MHz / 4 = 2MHz
+                  freq. = 2MHz / 100 = 20KHz
+                  period = 1/20KHz = 0.05ms = 50us
+                ============================================
+                
+ Input        : void  
+ Output       : None
+ Return Value : static
+ Calls        : 
+ Called By    : 
+ 
+  History        :
+  1.Date         : 2016/5/19
+    Author       : qiuweibo
+    Modification : Created function
+
+*****************************************************************************/
 static void TIM4_Config(void)
 {
-  /* Time Base configuration */
-  //TIM4_TimeBaseInit(TIM4_Prescaler_128, TIM4_PERIOD);
   TIM4_TimeBaseInit(TIM4_Prescaler_4, 99);
-  /* TIM4 update interrupt enable */
   TIM4_ITConfig(TIM4_IT_Update, ENABLE);
-  /* TIM4 counter enable */
   TIM4_Cmd(ENABLE);
 }
 

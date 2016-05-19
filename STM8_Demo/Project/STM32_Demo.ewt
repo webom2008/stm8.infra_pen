@@ -2042,6 +2042,9 @@
       <name>$PROJ_DIR$\..\Userdef\src\queue.c</name>
     </file>
     <file>
+      <name>$PROJ_DIR$\..\Userdef\src\sc7a30e.c</name>
+    </file>
+    <file>
       <name>$PROJ_DIR$\..\Userdef\src\stm8l15x_it.c</name>
     </file>
     <file>

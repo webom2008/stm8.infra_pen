@@ -34,6 +34,7 @@ extern "C"{
 #include "system_timer.h"
 #include "ir_driver.h"
 #include "mma8652.h"
+#include "sc7a30e.h"
 
 #ifdef __cplusplus
 #if __cplusplus

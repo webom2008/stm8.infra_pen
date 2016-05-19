@@ -358,11 +358,18 @@ static void MMA8652_InitTransientDetect(void)
     addr = TRANSIENT_CFG_REG;
     value = TELE_MASK | ZTEFE_MASK | YTEFE_MASK | XTEFE_MASK;
     MMA8652_WriteBytes(addr, &value, 1);
+
+    /*** Clear the F_Read bit to ensure both MSB¡¯s and LSB¡¯s are indexed */
+    addr = CTRL_REG1;
+    MMA8652_ReadBytes(addr, &value, 1);
+    value &= ~FREAD_MASK;
+    MMA8652_WriteBytes(addr, &value, 1);
     
 
     /* Enable Transient interrupt to wake up */
     addr = CTRL_REG3;
-    value = WAKE_TRANS_MASK;
+    /*** Configure the INT pins for Open Drain and Active Low */
+    value = WAKE_TRANS_MASK | PP_OD_MASK; 
     MMA8652_WriteBytes(addr, &value, 1);
 
     /* Enable Transient interrupt */
