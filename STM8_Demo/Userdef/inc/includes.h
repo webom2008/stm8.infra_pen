@@ -32,7 +32,7 @@ extern "C"{
 
 #include "utilities.h"
 #include "system_timer.h"
-#include "ir_driver.h"
+#include "infrared.h"
 #include "mma8652.h"
 #include "sc7a30e.h"
 

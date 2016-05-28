@@ -1681,16 +1681,13 @@
   <group>
     <name>UserDef</name>
     <file>
-      <name>$PROJ_DIR$\..\Userdef\src\ir_driver.c</name>
+      <name>$PROJ_DIR$\..\Userdef\src\infrared.c</name>
     </file>
     <file>
       <name>$PROJ_DIR$\..\Userdef\src\main.c</name>
     </file>
     <file>
       <name>$PROJ_DIR$\..\Userdef\src\mma8652.c</name>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\Userdef\src\queue.c</name>
     </file>
     <file>
       <name>$PROJ_DIR$\..\Userdef\src\sc7a30e.c</name>

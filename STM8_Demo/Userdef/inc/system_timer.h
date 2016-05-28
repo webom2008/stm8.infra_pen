@@ -27,10 +27,17 @@ extern "C"{
 #endif
 #endif /* __cplusplus */
 
+//#define TIME3_FOR_SYSTEM_TIMER
+#define TIME4_FOR_SYSTEM_TIMER
+
+
+
+
 extern void SysTick_Init(void);
 extern void SysTick_Start(void);
 extern void SysTick_Incremental(void);  
 extern u32 SysTick_Get(void);
+extern u32 SysTick_Get_us(void);
 extern s32 SysTick_Compare(u32 u32Tick1, u32 u32Tick2);
 extern u32 IsOnTime(const u32 u32Target);
 extern u32 IsOverTime(const u32 u32Base, const u32 u32Duration);

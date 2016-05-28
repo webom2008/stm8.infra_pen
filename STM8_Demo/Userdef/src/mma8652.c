@@ -63,6 +63,9 @@ static u8 test_pin_high_flag = 0;
 
 static void MMA8652_LowLevel_Init(void)
 {
+    /* Enable I2C1 clock */
+    CLK_PeripheralClockConfig(CLK_Peripheral_I2C1, ENABLE);
+    
     CLK_PeripheralClockConfig(MMA8652_I2C_CLK, ENABLE);
 
     /*!< DeInitializes the MMA8652_I2C */

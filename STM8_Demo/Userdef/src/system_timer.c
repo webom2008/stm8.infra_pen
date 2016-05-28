@@ -29,8 +29,8 @@
 /*----------------------------------------------*
  * internal routine prototypes                  *
  *----------------------------------------------*/
-static volatile u32 u32SystemTick;
-
+static volatile u32 u32SystemTick_ms;
+static volatile u16 u32SystemTick_us;
 /*----------------------------------------------*
  * project-wide global variables                *
  *----------------------------------------------*/
@@ -46,6 +46,7 @@ static volatile u32 u32SystemTick;
 /*----------------------------------------------*
  * macros                                       *
  *----------------------------------------------*/
+#define SYSTEMTIMER_TICK_US         10 /* used for timer count increase*/
 
 /*----------------------------------------------*
  * routines' implementations                    *
@@ -53,6 +54,7 @@ static volatile u32 u32SystemTick;
 
 void SysTick_Init(void)
 {
+#ifdef TIME3_FOR_SYSTEM_TIMER
 /*
        ===================================================================      
               TIM3 Driver: how to use it in Timing(Time base) Mode
@@ -77,7 +79,42 @@ void SysTick_Init(void)
     TIM3_PrescalerConfig(TIM3_Prescaler_8, TIM3_PSCReloadMode_Immediate);
     TIM3_ARRPreloadConfig(ENABLE);
     TIM3_ITConfig(TIM3_IT_Update, ENABLE);
-//    enableInterrupts();
+#endif
+
+#ifdef TIME4_FOR_SYSTEM_TIMER
+/*
+
+       ===================================================================      
+              TIM4 Driver: how to use it in Timing(Time base) Mode
+       =================================================================== 
+       To use the Timer in Timing(Time base) mode, the following steps are mandatory:
+       
+       1. Enable TIM4 clock using CLK_PeripheralClockConfig(CLK_Peripheral_TIM4, ENABLE) function.
+        
+       2. Call TIM4_TimeBaseInit() to configure the Time Base unit with the
+          corresponding configuration.
+          
+       3. Enable global interrupts if you need to generate the update interrupt.
+          
+       4. Enable the corresponding interrupt using the function TIM4_ITConfig(TIM4_IT_Update) 
+          
+       5. Call the TIM4_Cmd(ENABLE) function to enable the TIM4 counter.
+       
+       System Clock = 8MHz
+       timer 4 freq. = 100KHz, 10us
+       ==============Detail for TIMER4=============
+         SCLK = 8MHz, TIM4CLK = 8MHz / 8 = 1MHz
+         freq. = 1MHz / (9+1) = 100KHz
+         period = 1/20KHz = 0.05ms = 50us
+       ============================================
+*/
+    CLK_PeripheralClockConfig(CLK_Peripheral_TIM4, ENABLE);
+    TIM4_DeInit();
+    TIM4_TimeBaseInit(TIM4_Prescaler_8, 9);
+    TIM4_PrescalerConfig(TIM4_Prescaler_8, TIM4_PSCReloadMode_Immediate);
+    TIM4_ARRPreloadConfig(ENABLE);
+    TIM4_ITConfig(TIM4_IT_Update, ENABLE);
+#endif
 }
 
 /*****************************************************************************
@@ -97,8 +134,14 @@ void SysTick_Init(void)
 *****************************************************************************/
 void SysTick_Start(void)
 {
-    u32SystemTick = 0;
+    u32SystemTick_ms = 0;
+    u32SystemTick_us = 0;
+#ifdef TIME3_FOR_SYSTEM_TIMER
     TIM3_Cmd(ENABLE);
+#endif
+#ifdef TIME4_FOR_SYSTEM_TIMER
+    TIM4_Cmd(ENABLE);
+#endif
 }
 
 /*****************************************************************************
@@ -118,7 +161,12 @@ void SysTick_Start(void)
 *****************************************************************************/
 void SysTick_Incremental(void)
 {
-    u32SystemTick++;
+    u32SystemTick_us += SYSTEMTIMER_TICK_US;
+    if (u32SystemTick_us >= 1000)
+    {
+        u32SystemTick_us = 0;
+        u32SystemTick_ms++;
+    }
 }
 
 /*****************************************************************************
@@ -138,7 +186,27 @@ void SysTick_Incremental(void)
 *****************************************************************************/
 u32 SysTick_Get(void)
 {
-    return u32SystemTick;
+    return u32SystemTick_ms;
+}
+
+/*****************************************************************************
+ Prototype    : SysTick_Get_us
+ Description  : get system tick us
+ Input        : void  
+ Output       : None
+ Return Value : 
+ Calls        : 
+ Called By    : 
+ 
+  History        :
+  1.Date         : 2016/5/28
+    Author       : qiuweibo
+    Modification : Created function
+
+*****************************************************************************/
+u32 SysTick_Get_us(void)
+{
+    return u32SystemTick_us;
 }
 
 /*****************************************************************************

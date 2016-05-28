@@ -38,18 +38,7 @@
 
 /* Private typedef -----------------------------------------------------------*/
 /* Private define ------------------------------------------------------------*/
-#define TIM1_PERIOD                    104
-#define TIM1_PRESCALER                 0
-#define TIM1_REPTETION_COUNTER         0
 
-#define CCR1_Val                     52
-
-#define DEADTIME                        1
-#define TIM4_PERIOD                   255
-
-#define TIM2_PERIOD                     104
-#define TIM2_PULSE                      52
-    
 /* define the GPIO port and pins connected to Leds mounted on STM8L152X-EVAL board */
 #define LED_GPIO_PORT       GPIOE
 #define LED_GPIO_PIN        GPIO_Pin_7
@@ -65,18 +54,11 @@
 
 /* Private macro -------------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
-uint32_t g_Timer_Count = 0;
-uint32_t g_Send_Count = 0;
 /* Private function prototypes -----------------------------------------------*/
 void Delay (uint16_t nCount);
 static void CLK_Config(void);
 static void GPIO_Config(void);
-void TIM1_Config(void);
-static void TIM4_Config(void);
-void TIM2_Config(void);
 /* Private functions ---------------------------------------------------------*/
-
-extern uint32_t TimeCounter;
 
 static void CLK_Config(void)
 {
@@ -87,18 +69,6 @@ static void CLK_Config(void)
     CLK_SYSCLKDivConfig(CLK_SYSCLKDiv_2);
     while (CLK_GetSYSCLKSource() != CLK_SYSCLKSource_HSI)
     {}
-
-    /* Enable I2C1 clock */
-    CLK_PeripheralClockConfig(CLK_Peripheral_I2C1, ENABLE);
-
-    /* Enable TIM2 clock */
-    CLK_PeripheralClockConfig(CLK_Peripheral_TIM2, ENABLE);
-    
-    /* Enable TIM3 clock */
-    CLK_PeripheralClockConfig(CLK_Peripheral_TIM3, ENABLE);
-
-    /* Enable TIM4 clock */
-    CLK_PeripheralClockConfig(CLK_Peripheral_TIM4, ENABLE);
 }
 
 /**
@@ -108,117 +78,12 @@ static void CLK_Config(void)
   */
 static void GPIO_Config(void)
 {
-    //LED gpio init
-//    GPIO_Init(LED_GPIO_PORT, LED_GPIO_PIN, GPIO_Mode_Out_PP_Low_Fast);
-//    GPIO_Init(BLUE_GPIO_PORT, BLUE_GPIO_PIN, GPIO_Mode_Out_PP_Low_Fast);
-    
-    //IR send pin init
-    GPIO_Init(IR_GPIO_SEND_PORT, IR_GPIO_SEND_PIN, GPIO_Mode_Out_PP_Low_Fast);
-        
-    //IR receive pin init
-    GPIO_Init(IR_GPIO_REV_PORT, IR_GPIO_REV_PIN, GPIO_Mode_In_FL_IT);
-    EXTI_SetPinSensitivity(IR_REV_EXTI_PIN, EXTI_Trigger_Falling);
-    
     //Key pin init
     GPIO_Init(KEY_GPIO_PORT, KEY_GPIO_PIN, GPIO_Mode_In_PU_IT);
     EXTI_SetPinSensitivity(KEY_EXTI_PIN, EXTI_Trigger_Falling);
     
     GPIO_Init(KEY1_GPIO_PORT, KEY1_GPIO_PIN, GPIO_Mode_In_PU_IT);
     EXTI_SetPinSensitivity(KEY1_EXTI_PIN, EXTI_Trigger_Falling);
-}
-
-/**
-  * @brief  Configure TIM1 peripheral 
-  * @param  None
-  * @retval None
-  */
-void TIM1_Config(void)
-{
-  TIM1_DeInit();
-  
-  /* Time Base configuration */
-  TIM1_TimeBaseInit(TIM1_PRESCALER, TIM1_CounterMode_Up, TIM1_PERIOD, TIM1_REPTETION_COUNTER);
-
-  /* Channels 1, 2 and 3 Configuration in TIMING mode */
-  /* Toggle Mode configuration: Channel1 */
-  TIM1_OC1Init(TIM1_OCMode_Toggle, TIM1_OutputState_Enable, TIM1_OutputNState_Disable,
-               CCR1_Val, TIM1_OCPolarity_Low, TIM1_OCNPolarity_Low, TIM1_OCIdleState_Set,
-               TIM1_OCNIdleState_Set);
-  TIM1_OC1PreloadConfig(DISABLE);
-
-  TIM1_ARRPreloadConfig(ENABLE);
-
-  /* Main Output Enable */
-  TIM1_CtrlPWMOutputs(ENABLE);
-  /* TIM1 counter disable */
-  TIM1_Cmd(DISABLE);
-}
-
-/*****************************************************************************
- Prototype    : TIM2_Config
- Description  : timer2 configure
-                System Clock = 8MHz
-                timer 4 freq. = 38KHz
-                ==============Detail for TIMER4=============
-                  SCLK = 8MHz, TIM4CLK = 8MHz / 2 = 4MHz
-                  freq. = 4MHz / 105 = 38095 Hz = 38 KHz
-                ============================================
-                
- Input        : void  
- Output       : None
- Return Value : 
- Calls        : 
- Called By    : 
- 
-  History        :
-  1.Date         : 2016/5/19
-    Author       : qiuweibo
-    Modification : Created function
-
-*****************************************************************************/
-void TIM2_Config(void)
-{
-  TIM2_TimeBaseInit(TIM2_Prescaler_2, TIM2_CounterMode_Up, TIM2_PERIOD);
-
-  /* Channel 1 configuration in PWM1 mode */
-  /* TIM2 channel Duty cycle is 100 * TIM2_PULSE / (TIM2_PERIOD + 1) = 100 * 4/8 = 50 % */
-  TIM2_OC2Init(TIM2_OCMode_PWM1, TIM2_OutputState_Enable, TIM2_PULSE, TIM2_OCPolarity_Low, TIM2_OCIdleState_Set);
-
-  /* TIM2 Main Output Enable */
-  TIM2_CtrlPWMOutputs(ENABLE);
-
-  /* TIM2 counter enable */
-  TIM2_Cmd(DISABLE);
-}
-
-/*****************************************************************************
- Prototype    : TIM4_Config
- Description  : timer4 configure:
-                System Clock = 8MHz
-                timer 4 freq. = 20KHz, 50us
-                ==============Detail for TIMER4=============
-                  SCLK = 8MHz, TIM4CLK = 8MHz / 4 = 2MHz
-                  freq. = 2MHz / 100 = 20KHz
-                  period = 1/20KHz = 0.05ms = 50us
-                ============================================
-                
- Input        : void  
- Output       : None
- Return Value : static
- Calls        : 
- Called By    : 
- 
-  History        :
-  1.Date         : 2016/5/19
-    Author       : qiuweibo
-    Modification : Created function
-
-*****************************************************************************/
-static void TIM4_Config(void)
-{
-  TIM4_TimeBaseInit(TIM4_Prescaler_4, 99);
-  TIM4_ITConfig(TIM4_IT_Update, ENABLE);
-  TIM4_Cmd(ENABLE);
 }
 
 /**
@@ -231,19 +96,15 @@ void main(void)
     CLK_Config();
 
     SysTick_Init();
-    
-    TIM2_Config();
 
-    TIM4_Config();
+    Infrared_Init();
     
     GPIO_Config();
     
     MMA8652_Init();
 
     MMA8652_ConfigTransient(64, 100);
-    
-    ClearQueue(pIrQueue);
-    
+        
     /* Enable general interrupts */
     enableInterrupts();
 
@@ -252,7 +113,7 @@ void main(void)
     while(1)
     {
         MMA8652_server();
-        IrNec_server();
+        Infrared_server();
     }
 }
 
